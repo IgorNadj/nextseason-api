@@ -1,0 +1,5 @@
+.DS_Store
+parser/lists/
+parser/db/
+parser/node_modules/
+server/node_modules/
