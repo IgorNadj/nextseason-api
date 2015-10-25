@@ -4,7 +4,7 @@ var url = require('url');
 
 var actions = {};
 
-exports.start = function(){
+exports.start = function(debug){
 	const PORT=80; 
 
 	var server = http.createServer(function(request, response){
@@ -12,7 +12,7 @@ exports.start = function(){
 		response.setHeader('Access-Control-Allow-Origin', '*');
 
 		var requestParts = url.parse(request.url, true);
-		console.log('Access: '+requestParts.pathname);
+		debug('Access: '+requestParts.pathname);
 
 		if(actions[requestParts.pathname]){
 			var f = actions[requestParts.pathname];
