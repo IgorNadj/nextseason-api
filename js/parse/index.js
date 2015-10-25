@@ -126,7 +126,6 @@ module.exports.run = function(db, basePath, debug, onDone){
 
 
     // Prep
-    console.log('Parser starting');
     if(DRY_RUN) console.log('DRY RUN, WILL NOT WRITE TO DATABASE');
     debug('insertRowSql: ' + insertRowSql);
     var grammar = fs.readFileSync(grammarFilePath, 'utf-8');
@@ -190,7 +189,6 @@ module.exports.run = function(db, basePath, debug, onDone){
             process.exit(1);
         })
         .on('end', function(){
-            console.log('Parser done');
             onDone();
         })
     );

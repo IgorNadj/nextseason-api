@@ -49,9 +49,9 @@ var actionModule = require(actionPath);
 
 
 // Run
-console.log('Starting '+action);
+console.log('Starting action: '+action);
 actionModule.run(db, basePath, debug, function(){
-	console.log('Finished '+action);
+	console.log('Finished action: '+action);
 });
 
 
