@@ -4,7 +4,7 @@ var server = require('./js/server.js')
 	,sqlite3 = require('sqlite3');
 
 
-const DB_PATH = './../parser/db/db.sqlite';
+const DB_PATH = './../res/db/db.sqlite';
 
 // Setup
 sqlite3.verbose();

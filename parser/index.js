@@ -5,8 +5,8 @@ var fs = require('fs')
 
 
 
-const LIST_FILE = 'lists/release-dates.list';
-const DB_FILE = 'db/db.sqlite';
+const LIST_FILE = './../res/lists/release-dates.list';
+const DB_FILE = './../res/db/db.sqlite';
 const DEBUG_ENABLED = false;
 const DRY_RUN = false;
 
