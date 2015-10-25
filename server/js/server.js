@@ -5,7 +5,7 @@ var url = require('url');
 var actions = {};
 
 exports.start = function(){
-	const PORT=8080; 
+	const PORT=80; 
 
 	var server = http.createServer(function(request, response){
 		// allow access from wherevs
