@@ -36,7 +36,7 @@ exports.run = function(db, server){
 	});
 
 	server.registerAction('/api/shows/returning', function(request, response, params){
-		var MAX_COUNT = 20;
+		var MAX_COUNT = 100;
 		var start = params.start ? params.start : 0;
 		var limit = params.limit ? params.limit : MAX_COUNT;
 		if(limit > MAX_COUNT){
