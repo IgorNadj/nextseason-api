@@ -34,7 +34,7 @@ module.exports.run = function(db, basePath, debug, onDone){
 			db.run(createSql);
 
 			var selectMissingSql = ''+
-			'SELECT show.id AS show_id, show.name AS show_name '+
+			'SELECT DISTINCT show.id AS show_id, show.name AS show_name '+
 			'FROM season_release '+
 			'LEFT JOIN show ON (season_release.show_id = show.id) '+
 			'LEFT JOIN show_extra ON (show.id = show_extra.show_id) '+
