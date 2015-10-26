@@ -8,6 +8,7 @@ var ACTIONS = [
 	'update',
 	'parse',
 	'normalise',
+	'extra',
 	'serve'
 ];
 var action = process.argv[2];
@@ -52,6 +53,7 @@ var actionModule = require(actionPath);
 console.log('Starting action: '+action);
 actionModule.run(db, basePath, debug, function(){
 	console.log('Finished action: '+action);
+	db.close();
 });
 
 

@@ -1,3 +1,4 @@
 .DS_Store
 res/*
 node_modules/
+config/tmdb_api_key
