@@ -1,7 +1,8 @@
 var fs = require('fs')
     ,PEG = require("pegjs")
     ,es = require("event-stream")
-    ,exec = require('child_process').exec;
+    ,exec = require('child_process').exec
+    ,ProgressBar = require('progress');
 
 
 
@@ -9,8 +10,6 @@ var fs = require('fs')
 const LIST_FILE = '/res/lists/release-dates.list';
 const GRAMMAR_FILE = '/res/grammar/grammar.peg';
 const DRY_RUN = false;
-const SHOW_PROGRESS = true;
-const SHOW_PROGRESS_EVERY_N_LINES = 10000;
 const START_LINE = 0;
 const MAX_LINE = null; // null for unlimited
 
@@ -91,37 +90,25 @@ module.exports.run = function(db, basePath, debug, onDone){
         console.log(e);
     }
 
-    var timingStart = new Date().getTime();
-    var numLines = null;
+    // progress bar
+    var progressBar = null;
+    var setupProgressBar = function(numLines){
+        progressBar = new ProgressBar('  Parsing [:bar] :percent :etas', {
+            complete: '=',
+            incomplete: ' ',
+            width: 20,
+            total: numLines
+        });
+    }
     if(MAX_LINE){
-        numLines = MAX_LINE;
+        setupProgressBar(MAX_LINE);
     }else{
         exec('cat '+listFilePath+' | wc -l', function(err, r){
             if(err) return; // (most likely no wc) not a core function, ignore 
-            numLines = parseInt(r);
+            setupProgressBar(parseInt(r));
         });
     }
-
-    var showProgress = function(lineNumber){
-        if(!SHOW_PROGRESS) return;
-        if(lineNumber % SHOW_PROGRESS_EVERY_N_LINES !== 0) return;
-        var str = lineNumber;
-        if(numLines){
-            var d = new Date().getTime();
-            var secondsElapsed = (d - timingStart) / 1000;
-            var secondsPerLine = secondsElapsed / lineNumber;
-            var remainingLines = numLines - lineNumber;
-            var remainingSeconds = Math.round(remainingLines * secondsPerLine);
-            var etaStr = remainingSeconds + 's';
-            if(remainingSeconds > 60){
-                var remainingMinutes = Math.round(remainingSeconds / 60);
-                etaStr = remainingMinutes + 'm';
-            }
-            str = lineNumber + '/' + numLines + ' (ETA: ' + etaStr + ')';
-        }
-        console.log(str);
-    };
-
+    
 
 
 
@@ -162,7 +149,7 @@ module.exports.run = function(db, basePath, debug, onDone){
                 if(MAX_LINE && lineNumber > MAX_LINE) skip = true;
 
                 if(!skip){
-                    showProgress(lineNumber);
+                    if(progressBar) progressBar.tick(1);
                     debug('#'+lineNumber+': '+line);
 
                     var parsed = null;
