@@ -5,7 +5,7 @@ var fs = require('fs')
 
 
 
-const LOCAL_LIST_FILE = '/res/lists/release-dates.list';
+const LOCAL_LIST_FILE = '/res/lists/raw/release-dates.list';
 const FTP_HOST = 'ftp.fu-berlin.de';
 const REMOTE_LIST_FILE_GZ = '/pub/misc/movies/database/release-dates.list.gz';
 

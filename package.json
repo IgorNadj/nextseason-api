@@ -20,6 +20,7 @@
     "concat-stream": "^1.5.1",
     "event-stream": "^3.3.2",
     "ftp": "^0.3.10",
+    "iconv-lite": "^0.4.13",
     "pegjs": "^0.9.0",
     "progress": "^1.1.8",
     "sleep": "^3.0.0",

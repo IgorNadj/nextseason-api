@@ -6,6 +6,7 @@ Downloads, parses and makes available through an http API the release dates of u
 
 Actions:
 - update - connects to the imdb ftp servers and downloads the release_dates.list file
+- convert - convert the raw list file into utf-8 encoding
 - parse - parses the .list file and outputs into a sqlite database
 - normalise - creates normalised tables and views in the database
 - extra - adds extra show data from themoviedb.org

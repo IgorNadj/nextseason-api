@@ -6,6 +6,7 @@ var path = require('path')
 // Args
 var ACTIONS = [
 	'update',
+	'convert',
 	'parse',
 	'normalise',
 	'extra',
