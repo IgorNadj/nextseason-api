@@ -81,8 +81,9 @@ module.exports.run = function(db, basePath, debug, onDone){
 							}else{
 								var respRow = respObj.results[0];
 								var posterPath = respRow.poster_path == 'null' ? null : respRow.poster_path;
+								var posterPathSql = posterPath ? ('\'' + posterPath + '\'') : 'NULL';
 								insertSql = 'INSERT INTO show_extra (show_id, tmdb_id, tmdb_poster_path, tmdb_popularity) VALUES '+
-								'(' + row.show_id + ', ' + respRow.id + ', \'' + posterPath + '\', ' + respRow.popularity + ');';
+								'(' + row.show_id + ', ' + respRow.id + ', ' + posterPathSql + ', ' + respRow.popularity + ');';
 							}
 
 							// rate limiting
