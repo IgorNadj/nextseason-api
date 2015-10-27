@@ -7,7 +7,7 @@ var fs = require('fs')
 
 
 
-const LIST_FILE = '/res/lists/release-dates.list';
+const LIST_FILE = '/res/lists/converted/release-dates.list';
 const GRAMMAR_FILE = '/res/grammar/grammar.peg';
 const DRY_RUN = false;
 const START_LINE = 0;
@@ -176,6 +176,8 @@ module.exports.run = function(db, basePath, debug, onDone){
             process.exit(1);
         })
         .on('end', function(){
+            console.log('Parsing finished. Now please wait for the database to be updated. This will take a while.');
+            // TODO: can we get the database to be updated sooner? maybe don't run insertRow inside serialize?
             onDone();
         })
     );
