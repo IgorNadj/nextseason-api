@@ -37,7 +37,7 @@ exports.run = function(db, server){
 
 	server.registerAction('/api/shows/returning/popular', function(request, response, params){
 		var MAX_COUNT = 100;
-		const MIN_POPULARITY = 0.1;
+		var MIN_POPULARITY = 0.9;
 		var start = params.start ? params.start : 0;
 		var limit = params.limit ? params.limit : MAX_COUNT;
 		if(limit > MAX_COUNT){
