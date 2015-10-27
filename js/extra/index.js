@@ -34,7 +34,7 @@ module.exports.run = function(db, basePath, debug, onDone){
 			db.run(createSql);
 
 			var selectMissingSql = ''+
-			'SELECT DISTINCT show.id AS show_id, show.name AS show_name '+
+			'SELECT DISTINCT show.id AS show_id, show.name AS show_name, show.year AS show_year '+
 			'FROM season_release '+
 			'LEFT JOIN show ON (season_release.show_id = show.id) '+
 			'LEFT JOIN show_extra ON (show.id = show_extra.show_id) '+
@@ -69,38 +69,54 @@ module.exports.run = function(db, basePath, debug, onDone){
 				    
 					http.get(url, function(response){
 						response.pipe(concat(function(body){
-							var respObj = JSON.parse(body);
-							debug(respObj);
-
-							var insertSql;
-							if(respObj.total_results != 1){
-								// show not found, or too many shows found, note this so we dont query again
-								insertSql = 'INSERT INTO show_extra (show_id) VALUES ('+row.show_id+');';
-								debug('Show not found / too many shows found');
-
-							}else{
-								var respRow = respObj.results[0];
-								var posterPath = respRow.poster_path == 'null' ? null : respRow.poster_path;
-								var posterPathSql = posterPath ? ('\'' + posterPath + '\'') : 'NULL';
-								insertSql = 'INSERT INTO show_extra (show_id, tmdb_id, tmdb_poster_path, tmdb_popularity) VALUES '+
-								'(' + row.show_id + ', ' + respRow.id + ', ' + posterPathSql + ', ' + respRow.popularity + ');';
-							}
-
-							// rate limiting
+							// check rate limiting
 							var retryAfter = response.headers['retry-after'] ? parseInt(response.headers['retry-after'], 10) : 0;
-							debug('retryAfter: '+retryAfter);
 							if(retryAfter > 0){
 								debug('Rate limiting, waiting: '+retryAfter+'s');
 								sleep.sleep(retryAfter);
 								// have to retry this, re-add it to the stack
 								stack.push(row);
 								execNext();
-							}else{
-								debug(insertSql);
-								db.run(insertSql);
-								execNext();
+								return;
 							}
-								
+
+							// otherwise lets go
+							var respObj = JSON.parse(body);
+							// debug(respObj);
+
+							var result = null;
+							if(respObj.total_results == 0){
+								debug('Show not found');
+
+							}else{
+								debug('Show(s) found ...');
+								for(var i in respObj.results){
+									var r = respObj.results[i];
+									if(r.name == row.show_name && r.first_air_date && r.first_air_date.substring(0, 4) == row.show_year){
+										debug(' ... match found');
+										result = r;
+										break;
+									}
+								}
+								if(!result) debug(' ... no match found');
+							}
+
+							var insertSql;
+							if(result){
+								var posterPath = result.poster_path == 'null' ? null : result.poster_path;
+								var posterPathSql = posterPath ? ('\'' + posterPath + '\'') : 'NULL';
+								insertSql = 'INSERT INTO show_extra (show_id, tmdb_id, tmdb_poster_path, tmdb_popularity) VALUES '+
+								'(' + row.show_id + ', ' + result.id + ', ' + posterPathSql + ', ' + result.popularity + ');';
+
+							}else{
+								insertSql = 'INSERT INTO show_extra (show_id) VALUES ('+row.show_id+');';
+								// not found, note this so we dont query again
+								debug('Show not found');
+							}
+
+							debug(insertSql);
+							db.run(insertSql);
+							execNext();
 						}));
 
 					}).on('error', function(e){
