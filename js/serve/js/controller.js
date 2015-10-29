@@ -11,30 +11,6 @@ var apiReturn = function(response, err, data){
 
 exports.run = function(db, server){
 
-	// server.registerAction('/api/shows/all', function(request, response, params){
-	// 	db.all('SELECT s.*, e.* FROM show s LEFT JOIN next_unreleased_episode e ON (e.show_id = s.id) limit 5;', function(err, rows){
-	// 		apiReturn(response, err, rows); 
-	// 	});
-	// });
-
-	// server.registerAction('/api/shows/find', function(request, response, params){
-	// 	var like = '%' + params.query + '%';
-	// 	var stmt = db.prepare('SELECT * FROM show WHERE name LIKE ? LIMIT 10;');
-	// 	stmt.all(like, function(err, rows){
-	// 		apiReturn(response, err, rows);
-	// 	});
-	// 	stmt.finalize();
-	// });
-
-	// server.registerAction('/api/episodes/get', function(request, response, params){
-	// 	var show_id = params.show_id;
-	// 	var stmt = db.prepare('SELECT * FROM episode WHERE show_id = ?;');
-	// 	stmt.all(show_id, function(err, rows){
-	// 		apiReturn(response, err, rows);
-	// 	});
-	// 	stmt.finalize();
-	// });
-
 	server.registerAction('/api/shows/returning/popular', function(request, response, params){
 		var MAX_COUNT = 100;
 		var MIN_POPULARITY = 0.9;
@@ -79,8 +55,6 @@ exports.run = function(db, server){
 			apiReturn(response, err, rows);
 		});
 	});
-
-
 
 };
 
