@@ -53,7 +53,7 @@ module.exports.run = function(db, basePath, debug, onDone){
 				});
 
 			}else{
-				debug('Local file is up to date, no update necessary');
+				console.log('Local file is up to date, no update necessary');
 				ftpOnDone();
 			}
 		});
