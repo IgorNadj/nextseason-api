@@ -13,7 +13,13 @@ const REMOTE_LIST_FILE_GZ = '/pub/misc/movies/database/release-dates.list.gz';
 
 module.exports.run = function(db, basePath, debug, onDone){
 	var localListFilePath = basePath + LOCAL_LIST_FILE;
-	var localListFileLastMod = fs.statSync(localListFilePath).mtime;
+	var localListFileLastMod;
+	try{
+		localListFileLastMod = fs.statSync(localListFilePath).mtime;
+	}catch(e){
+		console.log('Local list file does not exist, getting from FTP');
+		localListFileLastMod = 0;
+	}
 	debug('localListFileLastMod: '+localListFileLastMod);
 
 	var ftpClient = new FtpClient();
