@@ -2,7 +2,6 @@ var fs = require('fs')
     ,http = require('http')
     ,concat = require('concat-stream')
     ,querystring = require('querystring')
-    ,sleep = require('sleep')
     ,ProgressBar = require('progress');
 
 
@@ -73,10 +72,13 @@ module.exports.run = function(db, basePath, debug, onDone){
 							var retryAfter = response.headers['retry-after'] ? parseInt(response.headers['retry-after'], 10) : 0;
 							if(retryAfter > 0){
 								debug('Rate limiting, waiting: '+retryAfter+'s');
-								sleep.sleep(retryAfter);
-								// have to retry this, re-add it to the stack
-								stack.push(row);
-								execNext();
+								setTimeout(
+									function(){
+										// have to retry this, re-add it to the stack
+										stack.push(row);
+										execNext();
+									},
+								);
 								return;
 							}
 
