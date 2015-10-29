@@ -1,0 +1,276 @@
+
+Expression
+  = Line+ 
+
+Line
+  = tvShowOrMovieOrBullshit:TvShowOrMovieOrBullshit _n_? 
+  { return tvShowOrMovieOrBullshit; }
+
+TvShowOrMovieOrBullshit
+  = TvShow / Movie / Bullshit
+
+
+
+Movie
+  = [^\"] [^\n]* { return null; }
+
+Bullshit
+  // movie starting with quote
+  = "\"Weird Al\"" [^\n]* { return null; }
+
+TvShow
+  = r:TvShowOption
+  {
+    // flatten in preparation for db insert
+    return {
+      show_name: r.titleAndEpisode.title,
+      show_year: r.titleAndEpisode.year,
+      episode_name: r.titleAndEpisode.episode.name,
+      season_number: r.titleAndEpisode.episode.number.season,
+      episode_number: r.titleAndEpisode.episode.number.episode,
+      release_date_raw: r.release.dateRaw,
+      release_date_timestamp: r.release.dateTimestamp,
+      release_date_location: r.release.dateLocation,
+      location_filmed: r.location,
+      // r: r,
+    }
+  }
+
+TvShowOption
+  = TvShowWithLocationWithSuspended / TvShowWithLocationWithoutSuspended / TvShowWithoutLocationWithSuspended / TvShowWithoutLocationWithoutSuspended
+
+  
+
+TvShowWithLocationWithSuspended
+  = titleAndEpisode:TitleAndEpisode SuspendedFlag _tabs_ release:Release _tabs_ location:Location
+  {
+    return {
+      titleAndEpisode: titleAndEpisode,
+      release: release,
+      location: location
+    }
+  }
+
+TvShowWithLocationWithoutSuspended
+  = titleAndEpisode:TitleAndEpisode _tabs_ release:Release _tabs_ location:Location
+  {
+    return {
+      titleAndEpisode: titleAndEpisode,
+      release: release,
+      location: location
+    }
+  }
+
+TvShowWithoutLocationWithSuspended
+  = titleAndEpisode:TitleAndEpisode SuspendedFlag _tabs_ release:Release
+  {
+    return {
+      titleAndEpisode: titleAndEpisode,
+      release: release,
+      location: null
+    }
+  }
+
+TvShowWithoutLocationWithoutSuspended
+  = titleAndEpisode:TitleAndEpisode _tabs_ release:Release
+  {
+    return {
+      titleAndEpisode: titleAndEpisode,
+      release: release,
+      location: null
+    }
+  }
+
+
+TitleAndEpisode
+  = TitleWithEpisode / TitleWithoutEpisode
+
+Release
+  = loc:[^:]+ ":" date:ReleaseDate 
+  {
+    return {
+      dateLocation: loc.join(''),
+      dateRaw: date.raw,
+      dateTimestamp: date.timestamp
+    }
+  }
+ 
+Location
+  = "(" loc:[^)]+ ")" 
+  { return loc.join(''); }
+
+SuspendedFlag
+  = " {{SUSPENDED}}"
+
+
+
+ReleaseDate
+  = ReleaseDateWithDayMonthYear / ReleaseDateWithMonthYear / ReleaseDateWithYear
+
+ReleaseDateWithDayMonthYear
+  = _s_? day:_integer_ _s_ month:_word_ _s_ year:_integer_
+  {
+    var raw = day + ' ' + month + ' ' + year;
+    var d = new Date(raw);
+    return {
+      raw: raw,
+      timestamp: d ? (d.getTime() / 1000) : null
+    }
+  }
+
+ReleaseDateWithMonthYear
+  = month:_word_ _s_ year:_integer_
+  {
+    var raw = month + ' ' + year;
+    // latest possible date, and we dont care about accuracy, its likely way in the future
+    var day = 31;
+    var d = new Date(day + ' ' + raw);
+    return {
+      raw: raw,
+      timestamp: d ? (d.getTime() / 1000) : null
+    }
+  }
+
+ReleaseDateWithYear
+  = year:_integer_
+  {
+    var raw = year;
+    // latest possible date, and we dont care about accuracy, its likely way in the future
+    var day = 31;
+    var month = 'December';
+    var d = new Date(day + ' ' + month + ' ' + raw);
+    return {
+      raw: raw,
+      timestamp: d ? (d.getTime() / 1000) : null
+    }
+  }
+
+
+TitleWithEpisode
+  = title:Title _s_ year:Year _s_ episode:Episode
+  {
+    return {
+      title: title,
+      year: year,
+      episode: episode
+    }
+  }
+
+TitleWithoutEpisode
+  = title:Title _s_ year:Year 
+  {
+    return {
+      title: title,
+      year: year,
+      episode: {
+        name: null,
+        number: {
+          season: null,
+          episode: null
+        }
+      }
+    }
+  }
+
+
+
+Title 
+  = "\"" str:[^"]+ "\"" 
+  { return str.join(''); }
+
+Year 
+  = "(" str:[^)]+ ")" 
+  { return str.join(''); } 
+
+Episode 
+  = (!"{{" "{") r:EpisodeNameAndNumber "}"
+  // have to negative-lookahead for {{ which is used for SuspendedFlag
+  { return r; }
+
+
+
+
+EpisodeNameAndNumber
+  = EpisodeNameJustNumber / EpisodeNameWithMultipleNumbers / EpisodeNameWithNumber / EpisodeNameWithoutNumber
+
+
+
+EpisodeNameJustNumber
+  = "(#" seasonNumber:_integer_ "." episodeNumber:_integer_ ")"
+  {
+    return {
+      name: null,
+      number: {
+        season: seasonNumber,
+        episode: episodeNumber
+      }
+    }
+  }
+
+EpisodeNameWithMultipleNumbers
+  = name1:(!"(#" .)+ name2:"(#" name3:[^)]+ name4:") " "(#" seasonNumber:_integer_ "." episodeNumber:_integer_ ")" 
+  {
+    // ignore predicate match
+    var n = '';
+    for(var i in name1) n += name1[i][1]; 
+    n += name2;
+    n += name3.join('');
+    n += name4;
+    return {
+      name: n.trim(),
+      number: {
+        season: seasonNumber,
+        episode: episodeNumber
+      }
+    }
+  }
+
+EpisodeNameWithNumber
+  = name:(!"(#" .)+ "(#" seasonNumber:_integer_ "." episodeNumber:_integer_ ")" 
+  {
+    // ignore predicate match
+    var n = '';
+    for(var i in name) n += name[i][1]; 
+    return {
+      name: n.trim(),
+      number: {
+        season: seasonNumber,
+        episode: episodeNumber
+      }
+    }
+  }
+
+EpisodeNameWithoutNumber
+  = name:(!"}" .)+ 
+  {
+    // ignore predicate match
+    var n = '';
+    for(var i in name) n += name[i][1]; 
+    return {
+      name: n.trim(),
+      number: {
+        season: null,
+        episode: null
+      }
+    }
+  }
+
+
+
+
+_integer_ "_integer_"
+  = [0-9]+ 
+  { return text().trim(); }
+
+_word_ "_word_"
+  = [^ \n\t]+
+  { return text().trim(); }
+
+_tabs_ "_tabs_"
+  = [\t]+ 
+
+_s_ "single space"
+  = [ ] 
+
+_n_ "new line"
+  = [\n]

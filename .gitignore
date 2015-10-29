@@ -1,4 +1,6 @@
 .DS_Store
-res/*
+res/db/*.sqlite
+res/lists/converted/*.list
+res/lists/raw/*.list
 node_modules/
 config/tmdb_api_key
