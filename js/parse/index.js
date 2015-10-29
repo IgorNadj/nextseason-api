@@ -57,7 +57,7 @@ module.exports.run = function(db, basePath, debug, onDone){
         }
         debug('insertRow: ' + arr);
         if(!DRY_RUN){
-            db.serialize(function(){
+            db.parallelize(function(){
                 var insertRowStatement = db.prepare(insertRowSql);
                 insertRowStatement.run(arr);
                 insertRowStatement.finalize();
