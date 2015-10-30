@@ -56,6 +56,34 @@ exports.run = function(db, server){
 		});
 	});
 
+	server.registerAction('/api/show', function(request, response, params){
+		var id = params.id;
+		var stmt = db.prepare(
+			'SELECT show.id AS show_id, show.name AS show_name, season_number, release_date_raw, release_date_timestamp, tmdb_id, tmdb_poster_path '+
+			'FROM season_release '+
+			'LEFT JOIN show ON (show.id = season_release.show_id) '+
+			'LEFT JOIN show_extra ON (show.id = show_extra.show_id) '+
+			'WHERE show.id = ? AND '+
+			'season_release.release_date_timestamp > cast(strftime(\'%s\', \'now\') AS INTEGER) AND season_release.season_number > 1;'
+		);
+		stmt.all(id, function(err, rows){
+			apiReturn(response, err, rows);
+		});
+	});
+
+	server.registerAction('/api/shows/autocomplete', function(request, response, params){
+		var q = params.q;
+		if(!q){
+			apiReturn(response, 'Param q required');
+			return;
+		}
+		var qWrapped = '%' + q + '%';
+		var stmt = db.prepare('SELECT id, name FROM show WHERE name LIKE ? LIMIT 10;');
+		stmt.all(qWrapped, function(err, rows){
+			apiReturn(response, err, rows);
+		});
+	});
+
 };
 
 
