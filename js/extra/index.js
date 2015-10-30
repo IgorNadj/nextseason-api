@@ -71,13 +71,14 @@ module.exports.run = function(db, basePath, debug, onDone){
 							// check rate limiting
 							var retryAfter = response.headers['retry-after'] ? parseInt(response.headers['retry-after'], 10) : 0;
 							if(retryAfter > 0){
-								debug('Rate limiting, waiting: '+retryAfter+'s');
+								debug('Rate limiting, waiting: '+retryAfter+'ms');
 								setTimeout(
 									function(){
 										// have to retry this, re-add it to the stack
 										stack.push(row);
 										execNext();
 									},
+									retryAfter/1000
 								);
 								return;
 							}
