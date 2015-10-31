@@ -10,6 +10,7 @@ Actions:
 - parse - parses the .list file and outputs into a sqlite database
 - normalise - creates normalised tables and views in the database
 - extra - adds extra show data from themoviedb.org
+- denormalise - cache upcoming series in a denormalised table
 - serve - reads the sqlite database and serves the data over http
 
 ## Install

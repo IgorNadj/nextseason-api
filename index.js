@@ -10,6 +10,7 @@ var ACTIONS = [
 	'parse',
 	'normalise',
 	'extra',
+	'denormalise',
 	'serve'
 ];
 var action = process.argv[2];

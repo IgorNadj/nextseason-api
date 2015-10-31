@@ -21,12 +21,10 @@ exports.run = function(db, server){
 			return;
 		}
 		var stmt = db.prepare(
-			'SELECT show.id AS show_id, show.name AS show_name, season_number, release_date_raw, release_date_timestamp, tmdb_id, tmdb_poster_path '+
-			'FROM season_release '+
-			'LEFT JOIN show ON (show.id = season_release.show_id) '+
-			'LEFT JOIN show_extra ON (show.id = show_extra.show_id) '+
-			'WHERE season_release.release_date_timestamp > cast(strftime(\'%s\', \'now\') AS INTEGER) AND season_release.season_number > 1 AND tmdb_popularity > '+MIN_POPULARITY+' '+
-			'ORDER BY season_release.release_date_timestamp, release_date_raw ASC '+
+			'SELECT * '+
+			'FROM upcoming_season_denorm '+
+			'WHERE release_date_timestamp > cast(strftime(\'%s\', \'now\') AS INTEGER) AND tmdb_popularity > '+MIN_POPULARITY+' '+
+			'ORDER BY release_date_timestamp, release_date_raw ASC '+
 			'LIMIT ? OFFSET ?;'
 		);
 		stmt.all(limit, start, function(err, rows){
@@ -43,12 +41,10 @@ exports.run = function(db, server){
 			return;
 		}
 		var stmt = db.prepare(
-			'SELECT show.id AS show_id, show.name AS show_name, season_number, release_date_raw, release_date_timestamp, tmdb_id, tmdb_poster_path '+
-			'FROM season_release '+
-			'LEFT JOIN show ON (show.id = season_release.show_id) '+
-			'LEFT JOIN show_extra ON (show.id = show_extra.show_id) '+
-			'WHERE season_release.release_date_timestamp > cast(strftime(\'%s\', \'now\') AS INTEGER) AND season_release.season_number > 1 '+
-			'ORDER BY season_release.release_date_timestamp, release_date_raw ASC '+
+			'SELECT *'+
+			'FROM upcoming_season_denorm '+
+			'WHERE release_date_timestamp > cast(strftime(\'%s\', \'now\') AS INTEGER) '+
+			'ORDER BY release_date_timestamp, release_date_raw ASC '+
 			'LIMIT ? OFFSET ?;'
 		);
 		stmt.all(limit, start, function(err, rows){
@@ -59,12 +55,10 @@ exports.run = function(db, server){
 	server.registerAction('/api/show', function(request, response, params){
 		var id = params.id;
 		var stmt = db.prepare(
-			'SELECT show.id AS show_id, show.name AS show_name, season_number, release_date_raw, release_date_timestamp, tmdb_id, tmdb_poster_path '+
-			'FROM season_release '+
-			'LEFT JOIN show ON (show.id = season_release.show_id) '+
-			'LEFT JOIN show_extra ON (show.id = show_extra.show_id) '+
-			'WHERE show.id = ? AND '+
-			'season_release.release_date_timestamp > cast(strftime(\'%s\', \'now\') AS INTEGER) AND season_release.season_number > 1;'
+			'SELECT * '+
+			'FROM upcoming_season_denorm '+
+			'WHERE show_id = ? AND '+
+			'release_date_timestamp > cast(strftime(\'%s\', \'now\') AS INTEGER);'
 		);
 		stmt.all(id, function(err, rows){
 			apiReturn(response, err, rows);
