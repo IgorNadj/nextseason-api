@@ -17,6 +17,7 @@ module.exports.download = function(saveToPath, onlyIfNewerThanFilePath, debug, o
 		fs.statSync(saveToPath);
 		alreadyExists = true;
 	}catch(e){
+		debug(e);
 		// does not exist, good
 	}
 	if(alreadyExists) throw 'File exists, move away and try again: '+saveToPath;
@@ -25,8 +26,9 @@ module.exports.download = function(saveToPath, onlyIfNewerThanFilePath, debug, o
 	var localLastMod = 0;
 	if(onlyIfNewerThanFilePath){
 		try{
-			localLastMod = fs.statSync(localPath).mtime;
+			localLastMod = fs.statSync(onlyIfNewerThanFilePath).mtime;
 		}catch(e){
+			// console.log(e);
 			debug('Local list file does not exist, getting from FTP');
 			localLastMod = 0;
 		}
@@ -47,6 +49,9 @@ module.exports.download = function(saveToPath, onlyIfNewerThanFilePath, debug, o
 			var remoteLastMod = data;
 			debug('remoteLastMod: '+remoteLastMod);
 
+			// console.log('remoteLastMod: '+remoteLastMod);
+			// console.log('localLastMod: '+localLastMod);
+			
 			if(!onlyIfNewerThanFilePath || remoteLastMod > localLastMod){
 				if(onlyIfNewerThanFilePath){
 					debug('New list file available, downloading (no progress bar), this may take a while');
