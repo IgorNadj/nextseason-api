@@ -15,7 +15,7 @@ Actions:
 -- serve - reads the sqlite database and serves the data over http
 
 - Then run on a schedule:
--- update - checks for newer list file and updates db with changes. Note: this updates to the point of normailse, you still need to run extra and denormalise. Limitations: update only updates existing episodes (as best as it can) and adds new ones. This is not perfect, you may need to do a full re-parse once in a while.
+-- update - checks for newer list file and updates db with changes. Note: this updates to the point of normailse, you still need to run extra and denormalise (alternatively run the update.sh script in res/scripts). Limitations: update only updates existing episodes (as best as it can) and adds new ones. This is not perfect, you may need to do a full re-parse once in a while.
 
 
 
