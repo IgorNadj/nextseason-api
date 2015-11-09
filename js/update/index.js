@@ -20,12 +20,14 @@ const MAX_LINE = null; // null for unlimited
 
 
 var dryRun = DRY_RUN;
-var fileExists = function(path){
+var fileExists = function(path, debug){
 	var exists = false;
 	try{
 		fs.accessSync(path);
 		exists = true;
-	}catch(e){}
+	}catch(e){
+		debug(e);
+	}
 	return exists;
 }
 
@@ -38,9 +40,9 @@ module.exports.run = function(db, basePath, debug, onDone){
 	var diffScriptPath = basePath + DIFF_SCRIPT_PATH;
 
 	// check prerequites
-	if(!fileExists(localListPath)) throw 'List list file ('+localListPath+') does not exist, have you run download?';
-	if(fileExists(newListPath)) throw 'File exists, move away and try again: '+newListPath;
-	if(fileExists(changesListPath)) throw 'File exists, move away and try again: '+changesListPath;
+	if(!fileExists(localListPath, debug)) throw 'List list file ('+localListPath+') does not exist, have you run download?';
+	if(fileExists(newListPath, debug)) throw 'File exists, move away and try again: '+newListPath;
+	if(fileExists(changesListPath, debug)) throw 'File exists, move away and try again: '+changesListPath;
 
 	var cleanupAndReturn = function(){
 		// 1. delete changes file
@@ -59,7 +61,7 @@ module.exports.run = function(db, basePath, debug, onDone){
 	// Run
 	console.log('Step 1. Download newer list');
 	downloader.download(newListPath, localListPath, debug, function(){
-		if(!fileExists(newListPath)){
+		if(!fileExists(newListPath, debug)){
 			console.log('No new list, exiting');
 			onDone();
 			return;
