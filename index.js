@@ -5,13 +5,13 @@ var path = require('path')
 
 // Args
 var ACTIONS = [
-	'update',
-	'convert',
+	'download',
 	'parse',
 	'normalise',
 	'extra',
 	'denormalise',
-	'serve'
+	'serve',
+	'update'
 ];
 var action = process.argv[2];
 var printUsage = function(){
@@ -45,7 +45,7 @@ var dbFile = path.resolve(basePath + '/res/db/db.sqlite');
 sqlite3.verbose();
 var db = new sqlite3.Database(dbFile);
 var debug = function(str){
-    if(debugEnabled) console.log(str);
+    if(debugEnabled) console.log('DEBUG: ', str);
 }
 var actionPath = './js/'+action;
 var actionModule = require(actionPath);

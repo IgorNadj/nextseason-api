@@ -128,3 +128,8 @@ CREATE INDEX season_release_release_date_timestamp_idx ON season_release (releas
 
 DROP INDEX IF EXISTS idx_show_name;
 CREATE INDEX idx_show_name ON show (name);
+
+
+
+
+DROP TABLE release_date;

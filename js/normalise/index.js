@@ -3,7 +3,7 @@ var fs = require('fs');
 
 
 const NORMALISE_SQL_FILE = '/res/sql/normalise.sql';
-var DRY_RUN = false;
+const DRY_RUN = false;
 
 
 var query = function(sql, db, debug, callback){
