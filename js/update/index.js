@@ -1,5 +1,6 @@
 var downloader = require('../download/downloader.js')
     ,fs = require('fs')
+    ,fs.existsSync = require('path').existsSync
     ,es = require("event-stream")
     ,childProcess = require('child_process')
     ,parseFunctions = require('../parse/parse-functions')

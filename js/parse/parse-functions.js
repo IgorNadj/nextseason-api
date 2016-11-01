@@ -26,6 +26,33 @@ var logParseError = function(e, lineNumber, line){
     console.log(e);
 };
 
+var progressBarFromFile = function(file){
+    var progressBar = null;
+    var setupProgressBar = function(numLines){
+        progressBar = new ProgressBar('  Parsing [:bar] :percent :etas', {
+            complete: '=',
+            incomplete: ' ',
+            width: 20,
+            total: numLines
+        });
+    }
+    if(MAX_LINE){
+        setupProgressBar(MAX_LINE);
+    }else{
+        exec('cat '+listFilePath+' | wc -l', function(err, r){
+            if(err) return; // (most likely no wc) not a core function, ignore 
+            setupProgressBar(parseInt(r));
+        });
+    }
+
+    
+    return {
+        tick: function(){
+
+        }
+    }
+};
+
 
 module.exports = {
 	init: function(basePath){
