@@ -88,7 +88,9 @@ module.exports.run = function(db, basePath, debug, onDone){
 
 					// otherwise lets go
 					var respObj = JSON.parse(body);
-					// debug(respObj);
+					if(!respObj.results){
+						throw 'Error response: '+body;
+					}
 
 					var insertIndex = 0;
 					var insertNext = function(){
