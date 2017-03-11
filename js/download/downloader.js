@@ -10,7 +10,11 @@ const REMOTE_LIST_FILE_GZ = '/pub/misc/movies/database/release-dates.list.gz';
 
 var ftpClient = null;
 function initFtpClient(debug, callback){
-	if(!ftpClient){
+	if(ftpClient){
+		ftpClient.on('ready', function(){
+			callback();
+		});
+	}else{
 		var client = new FtpClient();
 		client.on('error', function(err){
 			console.log('FTP Error:'+err);
