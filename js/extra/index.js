@@ -81,17 +81,17 @@ module.exports.run = function(db, basePath, debug, onDone){
 						setTimeout(
 							function(){
 								// have to retry this, re-add it to the stack
-								stack.push(row);
 								execNext();
 							},
-							retryAfter/1000
+							(retryAfter/1000) + 2000 // wait how long they want, plus 2 seconds, try again
 						);
 						return;
 					}
 
 					// otherwise lets go
 					var respObj = JSON.parse(body);
-					if(!respObj.results){
+
+					if(!respObj.results || respObj.results.length == 0){
 						console.log('API error: '+body);
 						numApiErrors++;
 						if(numApiErrors > MAX_API_ERRORS){
@@ -101,15 +101,10 @@ module.exports.run = function(db, basePath, debug, onDone){
 						return;
 					}
 
-					var insertIndex = 0;
-					var insertNext = function(){
+					// Good! insert
+					for(var result of respObj.results){
 						var result = respObj.results[insertIndex];
 						debug('result #'+insertIndex, result);
-						if(!result){
-							currentPageIndex++;
-							execNext();
-							return;
-						}
 						var posterPath = result.poster_path == 'null' ? null : result.poster_path;
 						var insertSql = 'INSERT INTO show_extra '+
 						'(show_id, name, first_air_date, tmdb_id, tmdb_poster_path, tmdb_popularity) VALUES '+
@@ -120,10 +115,10 @@ module.exports.run = function(db, basePath, debug, onDone){
 						if (!DRY_RUN) {
 							stmt.run(insertParams);
 						}
-						insertIndex++;
-						insertNext();
 					}
-					insertNext();
+
+					currentPageIndex++;
+					execNext();
 				}));
 
 			}).on('error', function(e){
