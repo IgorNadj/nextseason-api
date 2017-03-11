@@ -12,6 +12,9 @@ var ftpClient = null;
 function initFtpClient(debug, callback){
 	if(!ftpClient){
 		var client = new FtpClient();
+		client.on('error', function(err){
+			console.log('FTP Error:'+err);
+		});
 		client.connect({
 			host: FTP_HOST
 		});
@@ -61,6 +64,8 @@ module.exports.download = function(saveToPath, debug, onDone){
 		// does not exist, good
 	}
 	if(alreadyExists) throw 'File exists, move away and try again: '+saveToPath;
+
+	debug('About to connect');
 
 	initFtpClient(debug, function(){
 		ftpClient.get(REMOTE_LIST_FILE_GZ, function(err, downloadStream){
