@@ -9,23 +9,30 @@ const REMOTE_LIST_FILE_GZ = '/pub/misc/movies/database/release-dates.list.gz';
 
 
 var ftpClient = null;
+var ftpClientCallbacks = [];
+var ftpClientInitializing = false;
+var ftpClientReady = false;
 function initFtpClient(debug, callback){
-	if(ftpClient){
-		ftpClient.on('ready', function(){
-			callback();
+	if(ftpClientReady){
+		callback();
+		return;
+	}
+	ftpClientCallbacks.push(callback);
+	if (!ftpClientInitializing) {
+		ftpClientInitializing = true;
+		ftpClient = new FtpClient();
+		ftpClient.on('error', function(err){
+			throw err;
 		});
-	}else{
-		var client = new FtpClient();
-		client.on('error', function(err){
-			console.log('FTP Error:'+err);
-		});
-		client.connect({
+		ftpClient.connect({
 			host: FTP_HOST
 		});
-		client.on('ready', function(){
+		ftpClient.on('ready', function(){
 			debug('FTP connected');
-			ftpClient = client;
-			callback();
+			ftpClientReady = true;
+			for(var ftpClientCallback of ftpClientCallbacks){
+				ftpClientCallback();
+			}
 		});
 	}
 }

@@ -22,7 +22,7 @@ var fileExists = function(path, debug){
 
 
 
-module.exports.run = function(db, basePath, debug, onDone, forceUpdate){
+module.exports.run = function(db, basePath, debug, onDone, forceUpdate, forceParse){
 
 	var listPath = basePath + LIST_FILE;
 
@@ -41,8 +41,12 @@ module.exports.run = function(db, basePath, debug, onDone, forceUpdate){
 					console.log('  no newer list file exists, but forceUpdate specified');
 					stepMoveAwayCurrentListFile();
 				}else{
-					console.log('  no newer list file exists');
-					noMoreSteps();
+					if (forceParse) {
+						console.log('  no newer list file exists, but forceParse specified')
+					} else {
+						console.log('  no newer list file exists');
+						noMoreSteps();	
+					}
 				}
 			}
 		});

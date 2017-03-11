@@ -34,6 +34,7 @@ if(!action){
 var debugEnabled = false;
 var useFileDb = false;
 var forceUpdate = false;
+var forceParse = false;
 for(var i = 3; i < process.argv.length; i++){
 	var arg = process.argv[i];
 	if (arg == 'debug'){
@@ -45,6 +46,9 @@ for(var i = 3; i < process.argv.length; i++){
 	} else if (arg == 'forceupdate') {
 		forceUpdate = true;
 		console.log('FORCE UPDATING');
+	} else if (arg == 'forceparse') {
+		forceParse = true;
+		console.log('FORCE PARSING');
 	} else {
 		printUsage();
 		process.exit(1);
@@ -80,7 +84,8 @@ actionModule.run(
 		console.log('Finished action: '+action);
 		db.close();
 	},
-	forceUpdate
+	forceUpdate,
+	forceParse
 );	
 
 
