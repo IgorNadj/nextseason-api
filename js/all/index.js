@@ -66,7 +66,10 @@ module.exports.run = function(db, basePath, debug, onDone, forceUpdate){
 
 	function stepDownloadList(){
 		console.log('STEP: Download list');
-		downloader.download(listPath, debug, stepExtra);
+		downloader.download(listPath, debug, function(){
+			downloader.close();
+			stepExtra()
+		});
 	}
 
 	function stepExtra(){
@@ -91,7 +94,6 @@ module.exports.run = function(db, basePath, debug, onDone, forceUpdate){
 
 	function noMoreSteps(){
 		console.log('All Steps Done');
-		downloader.close();
 		onDone();
 	}
 	
