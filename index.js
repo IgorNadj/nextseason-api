@@ -14,7 +14,7 @@ var ACTIONS = [
 ];
 var action = process.argv[2];
 var printUsage = function(){
-	console.log('Usage: node ./index.js '+ACTIONS.join('|')+' [debug] [filedb] [forceupdate]');
+	console.log('Usage: node ./index.js '+ACTIONS.join('|')+' [debug] [filedb] [forceupdate] [forceparse]');
 	console.log('If unsure which action to call, call all');
 	process.exit(1);
 };
