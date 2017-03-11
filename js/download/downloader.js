@@ -69,9 +69,10 @@ module.exports.download = function(saveToPath, debug, onDone){
 	}
 	if(alreadyExists) throw 'File exists, move away and try again: '+saveToPath;
 
-	debug('About to connect');
+	debug('Ready to download file');
 
 	initFtpClient(debug, function(){
+		debug('Downloading file');
 		ftpClient.get(REMOTE_LIST_FILE_GZ, function(err, downloadStream){
 			if(err) throw err;
 
@@ -81,7 +82,7 @@ module.exports.download = function(saveToPath, debug, onDone){
 				.pipe(iconv.encodeStream('utf8'))
 			.pipe(fs.createWriteStream(saveToPath))
 			.on('finish', function(){
-				debug('List file downloaded');
+				debug('List file downloaded and decoded');
 				onDone();
 			});
 		});
