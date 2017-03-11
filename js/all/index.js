@@ -3,8 +3,7 @@ var downloader = require('../download/downloader.js')
     ,extra = require('../extra/index.js')
     ,normalise = require('../normalise/index.js')
     ,exporter = require('../export/index.js')
-    ,fs = require('fs')
-    ,rotate = require('log-rotate');
+    ,fs = require('fs');
 
 
 const LIST_FILE = '/res/lists/release-dates.list';
