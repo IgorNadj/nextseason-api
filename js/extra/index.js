@@ -13,6 +13,9 @@ const MAX_API_PAGES = 500; // 500 x 20 per page = 1000 most popular shows
 
 const DRY_RUN = false;
 
+const MAX_API_ERRORS = 10; // to prevent retrying forever
+var numApiErrors = 0;
+
 
 module.exports.run = function(db, basePath, debug, onDone){
 	var tmdbApiKeyFilePath = basePath + TMDB_API_KEY_FILE;
@@ -89,7 +92,12 @@ module.exports.run = function(db, basePath, debug, onDone){
 					// otherwise lets go
 					var respObj = JSON.parse(body);
 					if(!respObj.results){
-						throw 'Error response: '+body;
+						console.log('API error: '+body);
+						numApiErrors++;
+						if(numApiErrors > MAX_API_ERRORS){
+							throw 'Too many API errors, last was: '+body;
+						}
+						setTimeout(execNext, 5000); // wait 5 seconds, try again
 					}
 
 					var insertIndex = 0;
