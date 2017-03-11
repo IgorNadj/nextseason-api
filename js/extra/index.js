@@ -98,6 +98,7 @@ module.exports.run = function(db, basePath, debug, onDone){
 							throw 'Too many API errors, last was: '+body;
 						}
 						setTimeout(execNext, 5000); // wait 5 seconds, try again
+						return;
 					}
 
 					var insertIndex = 0;
