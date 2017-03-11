@@ -2,7 +2,8 @@ var fs = require('fs')
     ,es = require("event-stream")
     ,helperFunctions = require('./helper-functions')
     ,parseFunctions = require('./parse-functions')
-    ,dbFunctions = require('./db-functions.js');
+    ,dbFunctions = require('./db-functions.js')
+    ,extraHelperFunctions = require('../extra/helper-functions');
 
 
 
@@ -11,6 +12,8 @@ const LIST_FILE = '/res/lists/release-dates.list';
 const DRY_RUN = false;
 const START_LINE = 0;
 const MAX_LINE = null; // null for unlimited
+const ONLY_POPULAR_SHOWS = true;
+const MAX_FAILED_LINES = 100;
 
 
 
@@ -21,63 +24,98 @@ module.exports.run = function(db, basePath, debug, onDone){
     var listFilePath = basePath + LIST_FILE;
     if(dryRun) console.log('DRY RUN, WILL NOT WRITE TO DATABASE');
     
-    // Init
-    parseFunctions.init(basePath);
     var progressBar = MAX_LINE ? helperFunctions.fromNumLines(MAX_LINE) : helperFunctions.fromFile(listFilePath);
 
-    // Run    
-    dbFunctions.dropAndCreateTable(db, debug, dryRun);
+    init();
 
-    var lineNumber = 0;
-    var inHeaderSection = true
-    var inFooterSection = false;
-    var inputStream = fs.createReadStream(listFilePath)
-    .pipe(es.split())
-    .pipe(
-        es.mapSync(function(line){
+    function init(){
+        parseFunctions.init(basePath);
+        dbFunctions.dropAndCreateTable(db, debug, dryRun);
+        extraHelperFunctions.init(db, debug, run);
+    }
 
-            // pause the readstream
-            inputStream.pause();
-            lineNumber += 1;
-            
-            (function(){
-                var skip = false;
-                if(inHeaderSection){
-                    if(line == '==================') inHeaderSection = false;
-                    skip = true;
-                }
-                if(inFooterSection || line == '--------------------------------------------------------------------------------'){
-                    inFooterSection = true;
-                    skip = true;
-                }
-                if(lineNumber < START_LINE) skip = true;
-                if(MAX_LINE && lineNumber > MAX_LINE) skip = true;
+    function run(){
+        var lineNumber = 0;
+        var inHeaderSection = true
+        var inFooterSection = false;
+        var failedLines = [];
+        var numFailedLines = 0;
 
-                if(!skip){
-                    progressBar.tick();
-                    debug('#'+lineNumber+': '+line);
+        var inputStream = fs.createReadStream(listFilePath)
+        .pipe(es.split())
+        .pipe(
+            es.mapSync(function(line){
 
-                    var parsed = parseFunctions.parseLine(line, lineNumber);
-                    if(parsed){
-                        debug(parsed);
-                        dbFunctions.insertRow(parsed, db, debug, dryRun);
+                // pause the readstream
+                inputStream.pause();
+                lineNumber += 1;
+                
+                (function(){
+                    var skip = false;
+                    if(inHeaderSection){
+                        if(line == '==================') inHeaderSection = false;
+                        skip = true;
                     }
-                    
+                    if(inFooterSection || line == '--------------------------------------------------------------------------------'){
+                        inFooterSection = true;
+                        skip = true;
+                    }
+                    if(lineNumber < START_LINE) skip = true;
+                    if(MAX_LINE && lineNumber > MAX_LINE) skip = true;
+                    if(numFailedLines > MAX_FAILED_LINES) skip = true;
+
+                    if(!skip){
+                        progressBar.tick();
+                        debug('#'+lineNumber+': '+line);
+
+                        var parsed = parseFunctions.parseLine(line, lineNumber);
+                        if(parsed){
+                            //debug(parsed);
+
+                            var willInsert = true;
+                            if(ONLY_POPULAR_SHOWS){
+                                var extraShowId = extraHelperFunctions.isPopular(parsed.show_name, parsed.show_year);
+                                debug(parsed);
+                                debug('extraShowId: '+extraShowId);
+                                if(extraShowId === false){
+                                    // skip it, not popular enough
+                                    willInsert = false;
+                                }else{
+                                    // ooh so popular!
+                                    parsed.extra_show_id = extraShowId;
+                                }
+                            }
+                            if(willInsert){
+                                dbFunctions.insertRow(parsed, db, debug, dryRun);
+                            }
+                        }else if(parsed ===false){
+                            failedLines.push('#'+lineNumber+': '+line);
+                            numFailedLines++;
+                        }
+                        
+                    }
+
+                    // resume the readstream
+                    inputStream.resume();
+
+                })();
+            })
+            .on('error', function(){
+                console.log('Error while reading file.');
+                process.exit(1);
+            })
+            .on('end', function(){
+                console.log(' ');
+                if(failedLines.length > 0){
+                    console.log('Failed to parse '+failedLines.length+' lines');
+                    for(var i in failedLines){
+                        var line = failedLines[i];
+                        console.log(line);
+                    }
                 }
-
-                // resume the readstream
-                inputStream.resume();
-
-            })();
-        })
-        .on('error', function(){
-            console.log('Error while reading file.');
-            process.exit(1);
-        })
-        .on('end', function(){
-            console.log(' ');
-            console.log('Parsing finished. Now please wait for the database to be updated. This will take a while.');
-            onDone();
-        })
-    );
+                console.log('Parsing finished.');
+                onDone();
+            })
+        );
+    };
 };

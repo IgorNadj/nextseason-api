@@ -2,13 +2,15 @@ DROP TABLE IF EXISTS show;
 CREATE TABLE show (
 	id INTEGER PRIMARY KEY ASC, 
 	name TEXT, 
-	year INTEGER
+	year INTEGER,
+	extra_show_id INTEGER
 );
 INSERT INTO show (
 	name, 
-	year
+	year,
+	extra_show_id
 )
-SELECT show_name, show_year
+SELECT show_name, show_year, extra_show_id
 FROM release_date
 GROUP BY show_name;
 
@@ -111,7 +113,8 @@ SELECT
         season.show_id,
         season.number AS season_number,
         e2.release_date_timestamp,
-        e2.release_date_raw
+        e2.release_date_raw,
+        e2.release_date_location
 FROM season
 LEFT JOIN (
         SELECT season_id, min(number) AS min_episode_number
@@ -119,17 +122,6 @@ LEFT JOIN (
         GROUP BY show_id, season_id
 ) e ON (season.id = e.season_id)
 INNER JOIN (
-        SELECT season_id, number, release_date_raw, release_date_timestamp
+        SELECT season_id, number, release_date_raw, release_date_timestamp, release_date_location
         FROM episode
 ) e2 ON (e.season_id = e2.season_id AND e.min_episode_number = e2.number);
-
-DROP INDEX IF EXISTS season_release_release_date_timestamp_idx;
-CREATE INDEX season_release_release_date_timestamp_idx ON season_release (release_date_timestamp);
-
-DROP INDEX IF EXISTS idx_show_name;
-CREATE INDEX idx_show_name ON show (name);
-
-
-
-
-DROP TABLE release_date;

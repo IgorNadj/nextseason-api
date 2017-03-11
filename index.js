@@ -1,21 +1,21 @@
 var path = require('path')
-    ,sqlite3 = require('sqlite3');
+    ,betterSqlite3 = require('better-sqlite3');
 
 
 
 // Args
 var ACTIONS = [
+	'all', // todo: only run if new file exists (see old update script)
+	'extra',
 	'download',
 	'parse',
 	'normalise',
-	'extra',
-	'denormalise',
-	'serve',
-	'update'
+	'export',
 ];
 var action = process.argv[2];
 var printUsage = function(){
 	console.log('Usage: node ./index.js '+ACTIONS.join('|')+' [debug]');
+	console.log('If unsure which action to call, call all');
 	process.exit(1);
 };
 if(!action){
@@ -42,20 +42,28 @@ if(debugEnabled) console.log('DEBUG IS ENABLED');
 // Setup
 var basePath = path.resolve('./');
 var dbFile = path.resolve(basePath + '/res/db/db.sqlite');
-sqlite3.verbose();
-var db = new sqlite3.Database(dbFile);
-var debug = function(str){
-    if(debugEnabled) console.log('DEBUG: ', str);
+var db = new betterSqlite3(dbFile);
+var debug = function(){
+    if(debugEnabled){
+    	if(arguments.length === 1){
+    		console.log('DEBUG: ', arguments[0]);
+    	}else{
+    		console.log('DEBUG: ', arguments)
+    	}
+    }
 }
+
 var actionPath = './js/'+action;
 var actionModule = require(actionPath);
-
 
 // Run
 console.log('Starting action: '+action);
 actionModule.run(db, basePath, debug, function(){
 	console.log('Finished action: '+action);
 	db.close();
-});
+	debug('Database closed');
+});	
+
+
 
 

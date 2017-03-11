@@ -10,7 +10,8 @@ var columnTypeMap = {
     release_date_raw:       'TEXT',
     release_date_timestamp: 'INTEGER',
     release_date_location:  'TEXT',
-    location_filmed:        'TEXT'
+    location_filmed:        'TEXT',
+    extra_show_id:          'INTEGER',
 }
 
 
@@ -33,9 +34,7 @@ var insertRowSql = 'INSERT INTO release_date ('+colNameStr+') VALUES ('+colPlace
 var query = function(sql, db, debug, dryRun){
     debug(sql);
     if(!dryRun){
-        db.serialize(function(){
-            db.run(sql);
-        });
+        db.prepare(sql).run();
     }
 }
 
@@ -54,11 +53,7 @@ module.exports = {
         }
         debug('insertRow: ' + arr);
         if(!dryRun){
-            db.parallelize(function(){
-                var insertRowStatement = db.prepare(insertRowSql);
-                insertRowStatement.run(arr);
-                insertRowStatement.finalize();
-            });
+            db.prepare(insertRowSql).run(arr);
         }
     },
 
@@ -70,11 +65,9 @@ module.exports = {
         if(dryRun){
             callback();
         }else{
-            db.run(sql, params, function(err){
-                if(err) throw err;
-                var result = this;
-                callback(result.lastID);
-            });
+            let result = db.prepare(sql).run(params);
+            debug('last insert ID was: '+result.lastInsertROWID);
+            callback(result.lastInsertROWID);
         }
     },
 
@@ -83,10 +76,8 @@ module.exports = {
       */
     get: function(sql, params, db, debug, dryRun, callback){
         debug('get - sql: '+sql+', params: ['+params.join(', ')+']');
-        db.get(sql, params, function(err, row){
-            if(err) throw err;
-            callback(row);
-        });
+        let row = db.prepare(sql).get(params);
+        callback(row);
     }
 
     // updateOrInsertRow: function(params, db, debug, dryRun){

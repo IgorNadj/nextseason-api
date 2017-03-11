@@ -17,12 +17,13 @@
   },
   "homepage": "https://github.com/IgorNadj/nextseason-api#readme",
   "dependencies": {
+    "better-sqlite3": "^2.0.0",
     "concat-stream": "^1.5.1",
     "event-stream": "^3.3.2",
     "ftp": "^0.3.10",
     "iconv-lite": "^0.4.13",
+    "moment": "^2.16.0",
     "pegjs": "^0.9.0",
-    "progress": "^1.1.8",
-    "sqlite3": "^3.1.0"
+    "progress": "^1.1.8"
   }
 }

@@ -60,12 +60,15 @@ module.exports = {
 		var grammar = fs.readFileSync(grammarFilePath, 'utf-8');
 		pegParser = PEG.buildParser(grammar);	
 	},
+    /**
+     * @return Object|null|false - Object if tv show, null if not, false if error
+     */
 	parseLine: function(line, lineNumber){
 		try{
 			return pegParser.parse(line)[0];
 		}catch(e){
 			logParseError(e, lineNumber, line);
-			throw e;
+            return false;
 		}
 	}
 };

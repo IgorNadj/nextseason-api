@@ -6,14 +6,10 @@ const NORMALISE_SQL_FILE = '/res/sql/normalise.sql';
 const DRY_RUN = false;
 
 
-var query = function(sql, db, debug, callback){
+var query = function(sql, db, debug){
     debug(sql);
-    if(DRY_RUN){
-    	if(callback) callback();
-    }else{
-    	db.serialize(function(){
-    		db.run(sql, callback);
-    	});
+    if(!DRY_RUN){
+    	db.prepare(sql).run();
     } 
 };
 
@@ -34,7 +30,8 @@ module.exports.run = function(db, basePath, debug, onDone){
 		}else{
 			var sql = sqlStatements[queryNum].trim()+';';
 			queryNum++;
-			query(sql, db, debug, execNextQuery);
+			query(sql, db, debug);
+			execNextQuery();
 		}
 	};
 	execNextQuery();	
