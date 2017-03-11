@@ -42,9 +42,12 @@ module.exports.run = function(db, basePath, debug, onDone, forceUpdate, forcePar
 					stepMoveAwayCurrentListFile();
 				}else{
 					if (forceParse) {
-						console.log('  no newer list file exists, but forceParse specified')
+						console.log('  no newer list file exists, but forceParse specified');
+						downloader.close();
+						stepExtra();
 					} else {
 						console.log('  no newer list file exists');
+						downloader.close();
 						noMoreSteps();	
 					}
 				}
