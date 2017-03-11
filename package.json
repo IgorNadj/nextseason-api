@@ -1,21 +1,21 @@
 {
-  "name": "nextseason-api",
+  "name": "nextseason-parser",
   "version": "1.0.0",
-  "description": "parses imdb data and exposes it as a http api",
+  "description": "parses imdb data about tv shows next seasons",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/IgorNadj/nextseason-api.git"
+    "url": "git+https://github.com/IgorNadj/nextseason-parser.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/IgorNadj/nextseason-api/issues"
+    "url": "https://github.com/IgorNadj/nextseason-parser/issues"
   },
-  "homepage": "https://github.com/IgorNadj/nextseason-api#readme",
+  "homepage": "https://github.com/IgorNadj/nextseason-parser#readme",
   "dependencies": {
     "better-sqlite3": "^2.0.0",
     "concat-stream": "^1.5.1",
