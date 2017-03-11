@@ -14,12 +14,12 @@ var ACTIONS = [
 ];
 var action = process.argv[2];
 var printUsage = function(){
-	console.log('Usage: node ./index.js '+ACTIONS.join('|')+' [debug]');
+	console.log('Usage: node ./index.js '+ACTIONS.join('|')+' [debug] [filedb] [forceupdate]');
 	console.log('If unsure which action to call, call all');
 	process.exit(1);
 };
 if(!action){
-	printUsage(); 
+	action = 'all';
 }else{
 	var found = false;
 	for(var i in ACTIONS){
@@ -30,19 +30,33 @@ if(!action){
 	}
 	if(!found) printUsage();
 }
-var debugEnabled = process.argv[3] ? true : false;
-if(debugEnabled && process.argv[3] != 'debug') printUsage();
-if(process.argv[4]) printUsage();
-if(debugEnabled) console.log('DEBUG IS ENABLED');
 
-
+var debugEnabled = false;
+var useFileDb = false;
+var forceUpdate = false;
+for(var i = 3; i < process.argv.length; i++){
+	var arg = process.argv[i];
+	if (arg == 'debug'){
+		debugEnabled = true;
+		console.log('DEBUG IS ENABLED');	
+	} else if (arg == 'filedb') {
+		useFileDb = true;
+		console.log('USING FILE DB');
+	} else if (arg == 'forceupdate') {
+		forceUpdate = true;
+		console.log('FORCE UPDATING');
+	} else {
+		printUsage();
+		process.exit(1);
+	}
+}
 
 
 
 // Setup
 var basePath = path.resolve('./');
 var dbFile = path.resolve(basePath + '/res/db/db.sqlite');
-var db = new betterSqlite3(dbFile);
+var db = new betterSqlite3(dbFile, {memory: !useFileDb});
 var debug = function(){
     if(debugEnabled){
     	if(arguments.length === 1){
@@ -58,11 +72,16 @@ var actionModule = require(actionPath);
 
 // Run
 console.log('Starting action: '+action);
-actionModule.run(db, basePath, debug, function(){
-	console.log('Finished action: '+action);
-	db.close();
-	debug('Database closed');
-});	
+actionModule.run(
+	db, 
+	basePath, 
+	debug, 
+	function(){
+		console.log('Finished action: '+action);
+		db.close();
+	},
+	forceUpdate
+);	
 
 
 

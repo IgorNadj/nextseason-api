@@ -8,5 +8,8 @@ const LIST_FILE = '/res/lists/release-dates.list';
 
 module.exports.run = function(db, basePath, debug, onDone){
 	var localPath = basePath + LIST_FILE;
-	downloader.download(localPath, null, debug, onDone);
+	downloader.download(localPath, debug, function(){
+		downloader.close();
+		onDone();
+	});
 };

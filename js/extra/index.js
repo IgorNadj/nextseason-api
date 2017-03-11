@@ -11,7 +11,7 @@ const TMDB_API_PATH = 'http://api.themoviedb.org/3/discover/tv';
 
 const MAX_API_PAGES = 500; // 500 x 20 per page = 1000 most popular shows
 
-const DRY_RUN = true;
+const DRY_RUN = false;
 
 
 module.exports.run = function(db, basePath, debug, onDone){
