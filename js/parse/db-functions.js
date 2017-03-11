@@ -65,7 +65,7 @@ module.exports = {
         if(dryRun){
             callback();
         }else{
-            let result = db.prepare(sql).run(params);
+            var result = db.prepare(sql).run(params);
             debug('last insert ID was: '+result.lastInsertROWID);
             callback(result.lastInsertROWID);
         }
@@ -76,22 +76,8 @@ module.exports = {
       */
     get: function(sql, params, db, debug, dryRun, callback){
         debug('get - sql: '+sql+', params: ['+params.join(', ')+']');
-        let row = db.prepare(sql).get(params);
+        var row = db.prepare(sql).get(params);
         callback(row);
     }
 
-    // updateOrInsertRow: function(params, db, debug, dryRun){
-    //     var arr = [];
-    //     for(var colName in columnTypeMap){
-    //         arr.push(params[colName]);
-    //     }
-    //     debug('insertRow: ' + arr);
-    //     if(!dryRun){
-    //         db.parallelize(function(){
-    //             var insertRowStatement = db.prepare(insertRowSql);
-    //             insertRowStatement.run(arr);
-    //             insertRowStatement.finalize();
-    //         });
-    //     }
-    // }
 };

@@ -4,7 +4,7 @@ var cache = {};
 
 module.exports = {
     init: function(db, debug, callback){
-        let rows = db.prepare('SELECT show_id, name, first_air_date FROM show_extra;').all();
+        var rows = db.prepare('SELECT show_id, name, first_air_date FROM show_extra;').all();
         for(var i in rows){
             var row = rows[i];
             var year = row.first_air_date.split('-')[0];
