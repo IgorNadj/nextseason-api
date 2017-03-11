@@ -103,8 +103,7 @@ module.exports.run = function(db, basePath, debug, onDone){
 
 					// Good! insert
 					for(var result of respObj.results){
-						var result = respObj.results[insertIndex];
-						debug('result #'+insertIndex, result);
+						debug('result', result);
 						var posterPath = result.poster_path == 'null' ? null : result.poster_path;
 						var insertSql = 'INSERT INTO show_extra '+
 						'(show_id, name, first_air_date, tmdb_id, tmdb_poster_path, tmdb_popularity) VALUES '+
