@@ -30,7 +30,9 @@ module.exports.run = function(db, basePath, debug, onDone){
     	LEFT JOIN 
     		season_release sr 
     		ON (sr.show_id = s.id AND srmax.season_id = sr.season_id)
-    	;`
+    	WHERE 
+            sr.release_date_timestamp > strftime('%s', 'now')
+        ;`
     ).all();
 
     // convert from flat structure to nested
