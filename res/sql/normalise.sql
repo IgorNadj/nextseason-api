@@ -106,22 +106,67 @@ DROP TABLE episode_and_season;
 
 
 
-DROP VIEW IF EXISTS season_release;
-CREATE VIEW season_release AS
+DROP VIEW IF EXISTS season_location_release;
+CREATE VIEW season_location_release AS
 SELECT
-        season.id AS season_id,
-        season.show_id,
-        season.number AS season_number,
-        e2.release_date_timestamp,
-        e2.release_date_raw,
-        e2.release_date_location
+    season.id AS season_id,
+    season.show_id,
+    season.number AS season_number,
+    e2.release_date_timestamp,
+    e2.release_date_raw,
+    e2.release_date_location
 FROM season
-LEFT JOIN (
-        SELECT season_id, min(number) AS min_episode_number
-        FROM episode
-        GROUP BY show_id, season_id
-) e ON (season.id = e.season_id)
 INNER JOIN (
-        SELECT season_id, number, release_date_raw, release_date_timestamp, release_date_location
-        FROM episode
-) e2 ON (e.season_id = e2.season_id AND e.min_episode_number = e2.number);
+    SELECT season_id, min(number) AS min_episode_number
+    FROM episode
+    GROUP BY show_id, season_id
+) e ON (season.id = e.season_id)
+INNER JOIN episode e2 ON (e.season_id = e2.season_id AND e.min_episode_number = e2.number);
+
+
+
+DROP VIEW IF EXISTS season_earliest_future_release;
+CREATE VIEW season_earliest_future_release AS
+SELECT
+	season.id as season_id,
+	season.show_id,
+	season.number as season_number,
+	sr.earliest_release_date_timestamp
+FROM season
+INNER JOIN (
+	SELECT season_id, min(release_date_timestamp) AS earliest_release_date_timestamp 
+	FROM season_location_release 
+	GROUP BY season_id
+) sr ON (season.id = sr.season_id)
+WHERE sr.earliest_release_date_timestamp > CAST(strftime('%s', 'now') AS INTEGER);
+
+
+
+
+DROP VIEW IF EXISTS season_next_release;
+CREATE VIEW season_next_release AS 
+SELECT
+	sefr.season_id,
+	sefr.show_id,
+	sefr.season_number,
+	sefr.earliest_release_date_timestamp 
+FROM season_earliest_future_release sefr
+INNER JOIN (
+	SELECT season_id, MIN(season_number) as min_season_number
+	FROM season_earliest_future_release 
+	GROUP BY show_id
+) sefr2 ON (sefr.season_id = sefr2.season_id AND sefr.season_number = sefr2.min_season_number);
+
+
+
+DROP VIEW IF EXISTS show_next_season;
+CREATE VIEW show_next_season AS
+SELECT
+	s.id as show_id,
+	s.extra_show_id AS tmdbId, 
+	s.name, 
+	s.year, 
+	snr.season_number, 
+	snr.earliest_release_date_timestamp
+FROM show s 
+INNER JOIN season_next_release snr ON (s.id = snr.show_id);
