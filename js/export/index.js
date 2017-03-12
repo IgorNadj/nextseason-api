@@ -16,13 +16,15 @@ module.exports.run = function(db, basePath, debug, onDone){
     		sr.release_date_timestamp, 
     		sr.release_date_location 
     	FROM show s 
-    	LEFT JOIN (
+    	INNER JOIN (
     		SELECT 
     			season_id, 
     			show_id, 
-    			MAX(season_number) as max_season_number 
+    			MIN(season_number) as max_season_number 
     		FROM 
     			season_release 
+            WHERE 
+                release_date_timestamp > strftime('%s', 'now')
     		GROUP BY 
     			show_id
     	) srmax 
@@ -30,8 +32,6 @@ module.exports.run = function(db, basePath, debug, onDone){
     	LEFT JOIN 
     		season_release sr 
     		ON (sr.show_id = s.id AND srmax.season_id = sr.season_id)
-    	WHERE 
-            sr.release_date_timestamp > strftime('%s', 'now')
         ;`
     ).all();
 
